@@ -1,0 +1,6 @@
+This package contains a time (RFC 868),
+daytime (RFC 867) and SNTP (RFC 1361)
+server and client for OS/2 and NT.
+
+Author: Kai Uwe Rommel <rommel@ars.de>
+ftp://ftp.leo.org/pub/comp/os/os2/leo
