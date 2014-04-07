@@ -1,1 +1,3 @@
 getdate.c
+*.obj
+*.exe

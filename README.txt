@@ -81,6 +81,10 @@ service.
 
 - Recent Changes:
 
+v1.21 (Alex Taylor)
+ - The timezone offset field of the system DATETIME structure is now
+   properly set when system time is updated.
+
 v1.20 (Alex Taylor)
  - Added new -r (retries) and -i (retry interval) parameters.
  - Updated reported version string.

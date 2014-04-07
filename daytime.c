@@ -10,7 +10,7 @@
 static char *rcsid =
 "$Id: daytime.c,v 1.17 1999/06/13 12:00:58 rommel Exp rommel $";
 /* static char *rcsrev = "$Revision: 1.17 $"; */
-static char *rcsrev = "revision: 1.20";
+static char *rcsrev = "revision: 1.21";
 
 /*
  * $Log: daytime.c,v $

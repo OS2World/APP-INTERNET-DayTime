@@ -54,8 +54,8 @@ YACC = bison
 
 all: daytimed.exe daytime.exe
 
-daytimed.exe: daytimed$O getopt$O os$O
-	$(CC) $(LDFLAGS) $(OUT) $@ daytimed$O getopt$O os$O $(LIBS)
+daytimed.exe: daytimed$O getdate$O getopt$O os$O
+	$(CC) $(LDFLAGS) $(OUT) $@ daytimed$O getdate$O getopt$O os$O $(LIBS)
 
 daytime.exe: daytime$O getdate$O os$O getopt$O
 	$(CC) $(LDFLAGS) $(OUT) $@ daytime$O getdate$O os$O getopt$O $(LIBS)

@@ -46,6 +46,8 @@ static char *rcsrev = "$Revision: 1.8 $";
 
 #include "os.h"
 
+extern long difftm (struct tm *a, struct tm *b);
+
 #ifdef OS2
 
 #if defined(__UEL__)
@@ -57,8 +59,15 @@ static char *rcsrev = "$Revision: 1.8 $";
 
 int stime(time_t *newtime)
 {
-  struct tm *newtm = localtime(newtime);
+  struct tm *newtm;
+  struct tm *pgmtm, gmtm = {0};
   DATETIME dt;
+
+  pgmtm = gmtime(newtime);
+  /* copy in case gmtime and localtime use the same buffer */
+  if (pgmtm) gmtm = *pgmtm;
+
+  newtm = localtime(newtime);
 
   DosGetDateTime(&dt);
 
@@ -72,7 +81,8 @@ int stime(time_t *newtime)
   dt.year    = newtm -> tm_year + 1900;
   dt.weekday = newtm -> tm_wday;
 
-  /* dt.timezone = -1; */
+  dt.timezone = pgmtm ? difftm(&gmtm, newtm) / 60 : 0;
+  if(newtm->tm_isdst) dt.timezone += 60;
 
   return DosSetDateTime(&dt) != 0;
 }
@@ -414,7 +424,7 @@ int lprintf(char *format, ...)
   fputs(buffer, stdout);
   putc('\n', stdout);
   fflush(stdout);
- 
+
   return count;
 }
 
