@@ -9,7 +9,8 @@
 
 static char *rcsid =
 "$Id: daytimed.c,v 1.10 2002/05/16 17:41:23 Rommel Exp Rommel $";
-static char *rcsrev = "$Revision: 1.10 $";
+/* static char *rcsrev = "$Revision: 1.10 $"; */
+static char *rcsrev = "revision: 1.20";
 
 /*
  * $Log: daytimed.c,v $
@@ -93,7 +94,7 @@ int handle_request(int sock, service serv, protocol proto)
   time(&now);
   ourtime = (long) now;
 
-  /* Do NOT serve requests from invalid configured dynamic IP clients 
+  /* Do NOT serve requests from invalid configured dynamic IP clients
      (client address = 0.0.0.0) (fix from Bent C. Pedersen) */
   if (*((unsigned long *) &client.sin_addr) == 0)
      return lprintf("Request from 0.0.0.0 rejected."), 0;

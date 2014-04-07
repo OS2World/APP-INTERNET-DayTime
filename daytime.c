@@ -9,7 +9,8 @@
 
 static char *rcsid =
 "$Id: daytime.c,v 1.17 1999/06/13 12:00:58 rommel Exp rommel $";
-static char *rcsrev = "$Revision: 1.17 $";
+/* static char *rcsrev = "$Revision: 1.17 $"; */
+static char *rcsrev = "revision: 1.20";
 
 /*
  * $Log: daytime.c,v $
@@ -86,6 +87,8 @@ struct options
   int dont;
   int maxadj;
   int maxwait;
+  int retries;
+  int rtryint;
   long offset;
   service serv;
   protocol proto;
@@ -155,7 +158,7 @@ int get_and_set_time(int port, char *node, service serv, protocol proto,
     else
     {
       if ((host = gethostbyname(node)) == NULL)
-	return print_h_errno("gethostbyname()"), 1;
+	return print_h_errno("gethostbyname()"), 2;
 
       server.sin_addr = * (struct in_addr *) (host -> h_addr);
     }
@@ -167,15 +170,15 @@ int get_and_set_time(int port, char *node, service serv, protocol proto,
   case TCP:
 
     if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0)
-      return print_sock_errno("socket(tcp)"), 1;
+      return print_sock_errno("socket(tcp)"), 2;
 
     if (connect(sock, (struct sockaddr *) &server, sizeof(server)) < 0)
-      return print_sock_errno("connect()"), 1;
+      return print_sock_errno("connect()"), 2;
 
     if (serv == SNTP)
     {
       if (send(sock, buffer, bytes, 0) < 0)
-	return print_sock_errno("send()"), 1;
+	return print_sock_errno("send()"), 2;
     }
 
     FD_ZERO(&fds);
@@ -184,7 +187,7 @@ int get_and_set_time(int port, char *node, service serv, protocol proto,
     tv.tv_usec = 0;
 
     if ((rc = select(FD_SETSIZE, &fds, 0, 0, &tv)) < 0)
-      return print_sock_errno("select()"), 1;
+      return print_sock_errno("select()"), 2;
     else if (rc == 0)
     {
       soclose(sock);
@@ -193,7 +196,7 @@ int get_and_set_time(int port, char *node, service serv, protocol proto,
     }
 
     if ((bytes = recv(sock, buffer, sizeof(buffer), 0)) <= 0)
-      return print_sock_errno("recv()"), 1;
+      return print_sock_errno("recv()"), 2;
 
     soclose(sock);
 
@@ -202,11 +205,11 @@ int get_and_set_time(int port, char *node, service serv, protocol proto,
   case UDP:
 
     if ((sock = socket(PF_INET, SOCK_DGRAM, 0)) < 1)
-      return print_sock_errno("socket(udp)"), 1;
+      return print_sock_errno("socket(udp)"), 2;
 
     if (sendto(sock, buffer, bytes, 0,
                (struct sockaddr *) &server, sizeof(server)) < 0)
-      return print_sock_errno("sendto()"), 1;
+      return print_sock_errno("sendto()"), 2;
 
     FD_ZERO(&fds);
     FD_SET(sock, &fds);
@@ -214,7 +217,7 @@ int get_and_set_time(int port, char *node, service serv, protocol proto,
     tv.tv_usec = 0;
 
     if ((rc = select(FD_SETSIZE, &fds, 0, 0, &tv)) < 0)
-      return print_sock_errno("select()"), 1;
+      return print_sock_errno("select()"), 2;
     else if (rc == 0)
     {
       soclose(sock);
@@ -234,7 +237,7 @@ int get_and_set_time(int port, char *node, service serv, protocol proto,
   case MODEM:
 
     if ((bytes = get_modem_line(port, node, buffer, sizeof(buffer))) == -1)
-      return perror("modem"), 1;
+      return perror("modem"), 2;
 
     break;
 
@@ -324,42 +327,53 @@ int usage(void)
   printf("\nSet time from remote host, %s"
 	 "\n(C) 1997 Kai-Uwe Rommel\n", rcsrev);
 
+  printf("\nUsage: daytime [options] host\n"
+         "\nOptions:"
 #ifdef WIN32
-  printf("\nUsage: daytime [-l file] [-IUndtsu] [-m secs] [-c int] [-p port] host\n"
          "\n  -I       install as a service"
          "\n  -U       uninstall service\n"
-#else
-  printf("\nUsage: daytime [-l file] [-ndtsu] [-m secs] [-c int] [-p port] host\n"
 #endif
          "\n  -l file  write messages to logfile"
-	 "\n  -c int   run continuously, perform action every 'int' seconds"
+         "\n  -c int   run continuously, perform action every 'int' seconds"
          "\n  -n       do not set the local clock, display the remote time only"
          "\n  -o offs  adjust the retrieved time by offs seconds before"
-	 "\n           setting the local clock"
-	 "\n  -m secs  maximum number of seconds to adjust by"
-	 "\n  -w secs  maximum number of seconds to wait for the time server's answer\n"
+         "\n           setting the local clock"
+         "\n  -m secs  maximum number of seconds to adjust by"
+         "\n  -w secs  maximum number of seconds to wait for the time server's answer"
+         "\n  -r rtry  number of retries if a network connection error occurs (default 0)"
+         "\n  -i secs  number of seconds to wait between retries (default 15)"
          "\n  -d       use the DAYTIME service (port 13)"
          "\n  -t       use the TIME service (port 37, this is the default)"
          "\n  -s       use the SNTP service (port 123), usually requires -u too"
-	 "\n  -u       use the UDP protocol (default is to use TCP)"
-	 "\n  -p port  use nonstandard port number\n"
-	 "\n  -x       use serial modem to access time server"
-	 "\n           (in this case, the 'host' is the phone number to dial"
-	 "\n           and 'port' is the number of the serial port)\n");
+         "\n  -u       use the UDP protocol (default is to use TCP)"
+         "\n  -p port  use nonstandard port number\n"
+#if 0
+         "\n  -x       use serial modem to access time server"
+         "\n           (in this case, the 'host' is the phone number to dial"
+         "\n           and 'port' is the number of the serial port)\n");
+#else
+         "\n");
+#endif         	
   return 1;
 }
 
 int endless(void)
 {
   int rc = 0;
+  int rtry = 0;
 
   for(;;)
   {
     rc = get_and_set_time(opts.portnum, opts.host, opts.serv, opts.proto,
 			  opts.dont, opts.offset, opts.maxadj, opts.maxwait);
-
-    sleep(opts.interval);
+    if (rc == 2 && opts.retries && rtry < opts.retries) {
+        sleep(opts.rtryint);
+        rtry++;
+    }
+    else
+        sleep(opts.interval);
   }
+  return rc;
 }
 
 int main(int argc, char **argv)
@@ -388,8 +402,10 @@ int main(int argc, char **argv)
   opts.proto = TCP;
   opts.portnum = -1;
   opts.maxwait = 60;
+  opts.retries = 0;
+  opts.rtryint = 10;
 
-  while ((opt = getopt(argc, argv, "?l:IUndtsuo:p:c:m:w:x")) != EOF)
+  while ((opt = getopt(argc, argv, "?l:IUndtsuo:p:c:m:w:xr:i:")) != EOF)
     switch (opt)
     {
     case 'l':
@@ -425,6 +441,12 @@ int main(int argc, char **argv)
       break;
     case 'w':
       opts.maxwait = atol(optarg);
+      break;
+    case 'r':
+      opts.retries = atol(optarg);
+      break;
+    case 'i':
+      opts.rtryint = atol(optarg);
       break;
     case 'x':
       opts.proto = MODEM;
@@ -487,9 +509,16 @@ int main(int argc, char **argv)
   }
 #endif
 
-  if (opts.interval == 0)
-    return get_and_set_time(opts.portnum, opts.host, opts.serv, opts.proto,
-			    opts.dont, opts.offset, opts.maxadj, opts.maxwait);
+  if (opts.interval == 0) {
+    int tries = 0;
+    for (rc = 2; rc == 2 && tries <= opts.retries; tries++) {
+        rc = get_and_set_time(opts.portnum, opts.host, opts.serv, opts.proto,
+                              opts.dont, opts.offset, opts.maxadj, opts.maxwait);
+        if (rc == 2 && opts.retries)
+            sleep(opts.rtryint);
+    }
+    return rc;
+  }
   else
     return endless();
 }

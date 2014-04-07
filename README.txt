@@ -79,6 +79,17 @@ time only in longer intervals, such as once or twice a day or even
 longer, it is better to run the client program using the AT scheduling
 service.
 
+- Recent Changes:
+
+v1.20 (Alex Taylor)
+ - Added new -r (retries) and -i (retry interval) parameters.
+ - Updated reported version string.
+
+v1.19A (Robert Blair & Steven Levine)
+ - Fixed parsing of DAYTIME data returned from time.nist.gov and other
+   servers.
+ - TCP/IP stack problem fix.
+
 - Copyright:
 
 This code is in the public domain, but let me know if you make

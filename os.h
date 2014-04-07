@@ -3,7 +3,7 @@
  * Author:   <rommel@ars.de>
  * Created: Sat Apr 26 1997
  */
- 
+
 /* $Id: os.h,v 1.7 2002/05/21 06:50:50 Rommel Exp Rommel $ */
 
 /*
@@ -28,7 +28,7 @@
  *
  * Revision 1.1  1997/04/26 14:21:54  Rommel
  * Initial revision
- * 
+ *
  */
 
 #ifndef _OS_H
@@ -47,6 +47,7 @@ void print_sock_errno(char *text);
 #define BSD_SELECT
 #include <types.h>
 #include <sys/select.h>
+#include <unistd.h>
 
 #define INCL_DOS
 #include <os2.h>
@@ -58,12 +59,19 @@ void print_sock_errno(char *text);
 #endif
 
 #include <sys/types.h>
-#include <arpa/inet.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netdb.h>
 
 void print_h_errno(char *text);
+
+#ifndef NETDB_INTERNAL
+#define NETDB_INTERNAL -1
+#endif
+#ifndef NETDB_SUCCESS
+#define NETDB_SUCCESS 0
+#endif
 
 #if defined(__EMX__) || defined(__UEL__)
 
