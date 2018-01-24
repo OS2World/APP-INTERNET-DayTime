@@ -14,6 +14,7 @@ COMPILE TOOLS
 AUTHORS
 ===============
 * Kai Uwe Rommel
+* Steven Levine
 
 LINKS
 ===============
